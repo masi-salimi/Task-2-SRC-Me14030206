@@ -136,8 +136,8 @@ th{
   .rotated{
     transform: rotate(180deg);
   }
-  span i {
+  /* span i {
     
       transition:all  ease-in-out ;
      
-  }
+  } */

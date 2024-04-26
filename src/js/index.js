@@ -8,15 +8,12 @@ let result = "";
 const filters = {
   searchItems: "",
 };
-let sign = 1;
-let price = "price";
 
-let signd = 1;
-let date = "date";
+let sortType = "desc";
 
 document.addEventListener("DOMContentLoaded", () => {
-    allTransactions = [];
-    renderTrans(allTransactions, filters);
+  allTransactions = [];
+  renderTrans(allTransactions, filters);
 });
 
 btn.addEventListener("click", () => {
@@ -34,7 +31,9 @@ btn.addEventListener("click", () => {
 searchBox.addEventListener("input", (e) => {
   filters.searchItems = e.target.value;
   axios
-    .get("http://localhost:3000/transactions?refId_like =" + filters.searchItems)
+    .get(
+      "http://localhost:3000/transactions?refId_like =" + filters.searchItems
+    )
     .then((res) => {
       allTransactions = res.data;
       console.log(allTransactions);
@@ -73,13 +72,13 @@ function renderTrans(_trans, _filters) {
     <tr class="trans-header">
     <th class="trans-row">ردیف</th>
     <th class="trans-type">نوع تراکنش</th>
-    <th class="trans-price">مبلغ
+    <th class="trans-price psort">مبلغ
    <span  class="psort">
     <i class="fa fa-chevron-down iprice"></i>
      </span>
     </th>
     <th class="trans-refId">شماره پیگیری</th>
-    <th class="trans-date">تاریخ تراکنش
+    <th class="trans-date dsort">تاریخ تراکنش
     <span class="dsort">
     <i class="fa fa-chevron-down idate"></i>
      </span>
@@ -89,40 +88,41 @@ function renderTrans(_trans, _filters) {
       result +
       `</table>`;
     transactionsDOM.appendChild(transDiv);
+    const ipTag = document.querySelector(".iprice");
+    if (sortType == "asc") ipTag.classList.add("rotated");
+    else ipTag.classList.remove("rotated");
+
+    const idTag = document.querySelector(".idate");
+    if (sortType == "asc") idTag.classList.add("rotated");
+    else idTag.classList.remove("rotated");
+
     const psort = document.querySelector(".psort");
     const dsort = document.querySelector(".dsort");
 
-     psort.addEventListener("click", sortFunctionp);
-     dsort.addEventListener("click", sortFunctiond);
+    psort.addEventListener("click", sortFunction);
+    dsort.addEventListener("click", sortFunction);
   });
 }
 
-function sortFunctionp() {
-  sign *= -1;
-  price = sign > 0 ? "-price" : "price";
-  axios
-    .get("http://localhost:3000/transactions?_sort=" + price)
-    .then((res) => {
-      allTransactions = res.data;
-      renderTrans(allTransactions, filters);
-      const iTag = document.querySelector(".iprice");
-      if (sign < 0) iTag.classList.add("rotated");
-      else iTag.classList.remove("rotated");
-    })
-    .catch((err) => console.log(err));
-}
+function sortFunction() {
+  let sortData = "price";
+  if (this.classList.contains("dsort")) sortData = "date";
+  sortType = this.children[0].children[0].classList.contains("rotated")
+    ? "desc"
+    : "asc";
+  if (sortType == "asc") this.children[0].children[0].classList.add("rotated");
+  else this.children[0].children[0].classList.remove("rotated");
 
-function sortFunctiond() {
-  signd *= -1;
-  date = signd > 0 ? "-date" : "date";
   axios
-    .get("http://localhost:3000/transactions?_sort=" + date)
+    .get(
+      "http://localhost:3000/transactions?_sort=" +
+        sortData +
+        "&_order=" +
+        sortType
+    )
     .then((res) => {
       allTransactions = res.data;
       renderTrans(allTransactions, filters);
-      const iTag = document.querySelector(".idate");
-      if (signd < 0) iTag.classList.add("rotated");
-      else iTag.classList.remove("rotated");
     })
     .catch((err) => console.log(err));
 }
